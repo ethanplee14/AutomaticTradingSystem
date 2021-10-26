@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "preserveConstEnums": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "target": "ES6",
+    "allowJs": true,
+    "declaration": true,
+    "strict": true,
+    "strictNullChecks": true
+  },
+  "include": ["**/*"],
+  "exclude": ["./dist" ,"./node_modules"]
+}

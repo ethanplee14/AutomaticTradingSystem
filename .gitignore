@@ -1,0 +1,6 @@
+clientportal.gw
+node_modules
+*.iml
+.idea
+dist
+config
