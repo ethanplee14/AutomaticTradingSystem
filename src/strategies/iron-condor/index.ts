@@ -20,7 +20,6 @@ export class IronCondor implements Strategy {
     }
 
     async run(broker: Broker, market: MarketData) {
-        // TODO: Should really have strategy run constraints.
         if (!(await market.endOfWeek(new Date())) || !(await withinStrategyTradingHrs(market)))
             return
 

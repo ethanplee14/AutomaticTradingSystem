@@ -9,7 +9,6 @@ export function orders(tdaFetcher: TDAFetcher) {
 
         cancelOrder: function(accountId: string, orderId: string) {
             const endpoint = `accounts/${accountId}/orders/${orderId}`
-
         }
     }
 }
