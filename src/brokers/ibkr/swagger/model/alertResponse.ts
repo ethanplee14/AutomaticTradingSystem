@@ -56,7 +56,7 @@ export class AlertResponse {
     */
     'order_status'?: string;
     /**
-    * value can only be 0 or 1, set to 1 if the alert can be triggered outside regular trading equitiesMarketHours.
+    * value can only be 0 or 1, set to 1 if the alert can be triggered outside regular trading marketHrs.
     */
     'outsideRth'?: number;
     /**
@@ -104,7 +104,7 @@ export class AlertResponse {
     */
     'condition_size'?: number;
     /**
-    * whether allowing the condition can be triggered outside of regular trading equitiesMarketHours, 1 means allow
+    * whether allowing the condition can be triggered outside of regular trading marketHrs, 1 means allow
     */
     'condition_outside_rth'?: number;
     'conditions'?: Array<AlertResponseConditions>;

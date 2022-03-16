@@ -18,7 +18,7 @@ import { ContractRules } from './contractRules';
 */
 export class Contract {
     /**
-    * true means you can trade outside RTH(regular trading equitiesMarketHours)
+    * true means you can trade outside RTH(regular trading marketHrs)
     */
     'r_t_h'?: boolean;
     /**

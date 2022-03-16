@@ -1,14 +1,16 @@
+import {Order, OrderSide, OrderTimeInForce, OrderType} from "./order";
+import Decimal from "decimal.js";
 
-export class OptionOrder {
+export class OptionOrder implements Order {
 
     public symbol: string
     public strike: number
     public expire: Date
-    public side: "buy" | "sell"
+    public side: OrderSide
     public right: "call" | "put"
     public type: "MKT" | "LMT" | "STP" | "STP_LIMIT"
-    public price?: number
-    public tif: string
+    public price?: Decimal
+    public timeInForce: OrderTimeInForce
     public quantity: number
 
 
@@ -20,11 +22,11 @@ export class OptionOrder {
      */
     constructor(
         symbol: string, strike: number, expire: Date,
-        side: "buy" | "sell", right: "call" | "put",
-        type: "MKT" | "LMT" | "STP" | "STP_LIMIT",
-        price?: number,
+        side: OrderSide, right: "call" | "put",
+        type: OrderType,
+        price?: Decimal,
         quantity: number = 1,
-        tif: string = "day"
+        timeInForce: OrderTimeInForce = "GTC",
     ) {
         this.symbol = symbol
         this.strike = strike
@@ -33,19 +35,7 @@ export class OptionOrder {
         this.right = right
         this.type = type
         this.price = price
-        this.tif = tif
+        this.timeInForce = timeInForce
         this.quantity = quantity
-    }
-
-    equals(order: OptionOrder) {
-        return this.symbol == order.symbol &&
-            this.strike == order.strike &&
-            this.expire == order.expire &&
-            this.side == order.side &&
-            this.right == order.right &&
-            this.type == order.type &&
-            this.price == order.price &&
-            this.tif == order.tif &&
-            this.quantity == order.quantity
     }
 }

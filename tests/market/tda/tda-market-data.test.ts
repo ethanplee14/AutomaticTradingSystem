@@ -45,7 +45,7 @@ describe("Tests getting market data from TDAmeritrade", function() {
 
     it('should get market hours from TDAmeritrade', async function () {
         client.hours.singleMarket.mockResolvedValue(marketHoursSample)
-        const hours = await tdaMarketData.equitiesMarketHours("EQUITY", "2021-05-24")
+        const hours = await tdaMarketData.marketHrs("EQUITY", new Date("2021-05-24"))
         expect(hours).toMatchObject({
             start: new Date("2021-05-24T09:30:00-04:00"), end: new Date("2021-05-24T16:00:00-04:00"),
             dayOpen: true
@@ -54,7 +54,7 @@ describe("Tests getting market data from TDAmeritrade", function() {
 
     it('should get closed market hours from TDAmeritrade', async function () {
         client.hours.singleMarket.mockResolvedValue(marketClosedSample)
-        const hours = await tdaMarketData.equitiesMarketHours("OPTION", "2021-05-29")
+        const hours = await tdaMarketData.marketHrs("OPTION", new Date("2021-05-29"))
         expect(hours).toMatchObject({dayOpen: false})
     });
 })

@@ -168,7 +168,7 @@ export class MarketDataApi {
      * @param period available time period-- {1-30}min, {1-8}h, {1-1000}d, {1-792}w, {1-182}m, {1-15}y
      * @param exchange Exchange of the conid (e.g. ISLAND, NYSE, etc.). Default value is empty which corresponds to primary exchange of the conid.
      * @param bar possible value-- 1min, 2min, 3min, 5min, 10min, 15min, 30min, 1h, 2h, 3h, 4h, 8h, 1d, 1w, 1m
-     * @param outsideRth For contracts that support it, will determine if historical data includes outside of regular trading equitiesMarketHours.
+     * @param outsideRth For contracts that support it, will determine if historical data includes outside of regular trading marketHrs.
      */
     public async iserverMarketdataHistoryGet (conid: string, period: string, exchange?: string, bar?: string, outsideRth?: boolean, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: HistoryData;  }> {
         const localVarPath = this.basePath + '/iserver/marketdata/history';

@@ -1,4 +1,4 @@
 
 export interface MarketHours {
-    start?: Date, end?: Date, dayOpen: boolean
+    start?: Date, end?: Date, isOpen: boolean
 }

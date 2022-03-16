@@ -14,7 +14,7 @@ import { RequestFile } from './models';
 
 export class InlineResponse20031OrderTypesOutside {
     /**
-    * order types that support outside of regular trading equitiesMarketHours
+    * order types that support outside of regular trading marketHrs
     */
     '_0'?: string;
 

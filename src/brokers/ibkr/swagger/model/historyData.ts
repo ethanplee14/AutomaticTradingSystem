@@ -55,7 +55,7 @@ export class HistoryData {
     */
     'mktDataDelay'?: number;
     /**
-    * The historical data returned includes outside of regular trading equitiesMarketHours
+    * The historical data returned includes outside of regular trading marketHrs
     */
     'outsideRth'?: boolean;
     /**

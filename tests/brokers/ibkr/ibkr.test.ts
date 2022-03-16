@@ -7,6 +7,8 @@ import {ContractApi, OrderApi, AccountApi} from "../../../src/brokers/ibkr/swagg
 import {randomIntRange} from "../../../src/utils/math";
 import {mockResolvedOnce} from "../../test-utils/swagger";
 import {accountSummary} from "../../fixtures/broker/account";
+import Decimal from "decimal.js";
+import {Order} from "../../../src/brokers/order";
 require('datejs')
 
 
@@ -17,7 +19,8 @@ jest.mock('../../../src/brokers/ibkr/swagger/api/AccountApi')
 const accountId = "F999999"
 let ibkr = new Ibkr(accountId)
 
-describe('Ibkr place order tests', function () {
+
+describe('"Ibkr place equities order tests', function () {
 
     const mockedContract = mocked(mocked(ContractApi).mock.instances[0])
     const mockedOrder = mocked(mocked(OrderApi).mock.instances[0])
@@ -25,11 +28,97 @@ describe('Ibkr place order tests', function () {
     afterEach(() => jest.clearAllMocks())
     afterAll(() => jest.resetAllMocks())
 
+    it('should place market equities buy order', async function() {
+        const pltrOrder: Order = {
+            symbol: "PLTR", side: "BUY",
+            type: "MKT", quantity: 1, timeInForce: "DAY"
+        }
+        mockResolvedOnce(mockedContract.iserverSecdefSearchPost, [{conid: 12345, description: "NYSE"}])
+        mockResolvedOnce(mockedOrder.iserverAccountAccountIdOrdersPost, [{order_id: 1049831066, order_status: "Filled"}])
+        const orders = await ibkr.placeEquitiesOrders(pltrOrder)
+
+        expect(mockedContract.iserverSecdefSearchPost).toHaveBeenCalledWith({symbol: pltrOrder.symbol})
+        expect(mockedOrder.iserverAccountAccountIdOrdersPost).toHaveBeenCalledWith(accountId, {
+            orders: [{
+                conid: 12345, side: "BUY",
+                orderType: "MKT", quantity: 1, tif: "DAY"
+            }]
+        })
+        expect(orders).toEqual([{orderId: 1049831066, status: "Filled"}])
+    })
+
+    it('should place market equities sell order', async function() {
+        const asanOrder: Order = {
+            symbol: "ASAN", side: "SELL",
+            type: "MKT", quantity: 128, timeInForce: "GTC"
+        }
+
+        mockResolvedOnce(mockedContract.iserverSecdefSearchPost, [{conid: 4830, description: "NASDAQ"}])
+        mockResolvedOnce(mockedOrder.iserverAccountAccountIdOrdersPost, [{order_id: 19023865, order_status: "Filled"}])
+        const orders = await ibkr.placeEquitiesOrders(asanOrder)
+
+        expect(mockedContract.iserverSecdefSearchPost).toHaveBeenCalledWith({symbol: asanOrder.symbol})
+        expect(mockedOrder.iserverAccountAccountIdOrdersPost).toHaveBeenCalledWith(accountId, {
+            orders: [{
+                conid: 4830, side: "SELL",
+                orderType: "MKT", quantity: 128, tif: "GTC"
+            }]
+        })
+        expect(orders).toEqual([{orderId: 19023865, status: "Filled"}])
+    })
+
+    it('should place limit equities buy order', async function () {
+        const googOrder: Order = {
+            symbol: "GOOG", side: "BUY",
+            type: "LMT", quantity: 7361, timeInForce: "GTC"
+        }
+        mockResolvedOnce(mockedContract.iserverSecdefSearchPost, [{conid: 45678, description: "NYSE"}])
+        mockResolvedOnce(mockedOrder.iserverAccountAccountIdOrdersPost, [{order_id: 12094589, order_status: "Submitted"}])
+        const orders = await ibkr.placeEquitiesOrders(googOrder)
+
+        expect(mockedContract.iserverSecdefSearchPost).toHaveBeenCalledWith({symbol: googOrder.symbol})
+        expect(mockedOrder.iserverAccountAccountIdOrdersPost).toHaveBeenCalledWith(accountId, {
+            orders: [{
+                conid: 45678, side: "BUY",
+                orderType: "LMT", quantity: 7361, tif: "GTC"
+            }]
+        })
+        expect(orders).toEqual([{orderId: 12094589, status: "Submitted"}])
+    });
+
+    it('should do nothing if quantity is 0', async function() {
+        const zeroQuantityOrder: Order = {
+            symbol: "ZERO", side: "BUY",
+            type: "LMT", quantity: 0, timeInForce: "GTC"
+        }
+        const orders = await ibkr.placeEquitiesOrders(zeroQuantityOrder)
+        expect(mockedContract.iserverSecdefSearchPost).not.toHaveBeenCalled()
+        expect(mockedOrder.iserverAccountAccountIdOrdersPost).not.toHaveBeenCalled()
+        expect(orders).toEqual([])
+    })
+
+    it('should do nothing if no orders entered', async function() {
+        const orders = await ibkr.placeEquitiesOrders()
+        expect(mockedContract.iserverSecdefSearchPost).not.toHaveBeenCalled()
+        expect(mockedOrder.iserverAccountAccountIdOrdersPost).not.toHaveBeenCalled()
+        expect(orders).toEqual([])
+    })
+});
+
+describe('Ibkr place option order tests', function () {
+
+    const mockedContract = mocked(mocked(ContractApi).mock.instances[0])
+    const mockedOrder = mocked(mocked(OrderApi).mock.instances[0])
+
+    afterEach(() => jest.clearAllMocks())
+    afterAll(() => jest.resetAllMocks())
+
+
     it('should place market buy call order', async function () {
         const symbol = "PLTR"
         const expireDate = new Date(2021, 4, 14)
         const [timestamp, underlyingId, contractId] = stageOptionLookup(symbol, "C", expireDate)
-        const pltrOrder = new OptionOrder(symbol, 25, expireDate, "buy", "call", "MKT")
+        const pltrOrder = new OptionOrder(symbol, 25, expireDate, "BUY", "call", "MKT")
         await ibkr.placeOptionOrders(pltrOrder)
 
         expect(mockedContract.iserverSecdefSearchPost).toHaveBeenCalledWith({symbol})
@@ -50,7 +139,7 @@ describe('Ibkr place order tests', function () {
         const expireDate = new Date(2021, 1, 26)
         const [timestamp, underlyingId, contractId] = stageOptionLookup(symbol, "P", expireDate)
 
-        const buyPut = new OptionOrder(symbol, 500, expireDate, "sell", "put", "MKT", undefined, 5)
+        const buyPut = new OptionOrder(symbol, 500, expireDate, "SELL", "put", "MKT", undefined, 5)
         await ibkr.placeOptionOrders(buyPut)
 
         expect(mockedContract.iserverSecdefSearchPost).toHaveBeenCalledWith({symbol})
@@ -71,8 +160,8 @@ describe('Ibkr place order tests', function () {
         const [_, underlyingId, contractId] = stageOptionLookup(symbol, "C", expireDate)
         const [timestamp, underlyingId2, contractId2] = stageOptionLookup(symbol, "P", expireDate)
 
-        const buyCall = new OptionOrder(symbol, 172.5, expireDate, "buy", "call", "LMT", 8)
-        const sellCall = new OptionOrder(symbol, 170, expireDate, "sell", "call", "LMT", 9.50)
+        const buyCall = new OptionOrder(symbol, 172.5, expireDate, "BUY", "call", "LMT", new Decimal(8))
+        const sellCall = new OptionOrder(symbol, 170, expireDate, "SELL", "call", "LMT", new Decimal(9.50))
         await ibkr.placeOptionOrders(buyCall, sellCall)
 
         expect(mockedContract.iserverSecdefSearchPost).toHaveBeenCalledTimes(2)
@@ -109,10 +198,10 @@ describe('Ibkr place order tests', function () {
         const csContractId = stageOptionLookup(symbol, "C", expireDate)[2]
         const [timestamp, _, cbContractId] = stageOptionLookup(symbol, "C", expireDate)
 
-        const pbOrder = new OptionOrder(symbol, 1830, expireDate, "buy", "put", "MKT")
-        const psOrder = new OptionOrder(symbol, 1840, expireDate, "sell", "put", "MKT")
-        const csOrder = new OptionOrder(symbol, 2250, expireDate, "sell", "call", "MKT")
-        const cbOrder = new OptionOrder(symbol, 2260, expireDate, "buy", "call", "MKT")
+        const pbOrder = new OptionOrder(symbol, 1830, expireDate, "BUY", "put", "MKT")
+        const psOrder = new OptionOrder(symbol, 1840, expireDate, "SELL", "put", "MKT")
+        const csOrder = new OptionOrder(symbol, 2250, expireDate, "SELL", "call", "MKT")
+        const cbOrder = new OptionOrder(symbol, 2260, expireDate, "BUY", "call", "MKT")
         await ibkr.placeOptionOrders(pbOrder, psOrder, csOrder, cbOrder)
 
         expect(mockedContract.iserverSecdefSearchPost).toHaveBeenCalledTimes(4)
@@ -154,7 +243,7 @@ describe('Ibkr place order tests', function () {
             conid: contractId2, symbol, right: "P", maturityDate: dateFormat(expireDate.addWeeks(1), 'yyyymmdd')
         }])
 
-        const sellPut = new OptionOrder(symbol, 2.50, expireDate, "sell", "put", "MKT", undefined, 3)
+        const sellPut = new OptionOrder(symbol, 2.50, expireDate, "SELL", "put", "MKT", undefined, 3)
         await ibkr.placeOptionOrders(sellPut)
         expect(mockedOrder.iserverAccountAccountIdOrdersPost).toHaveBeenCalledWith(accountId, {
             orders: [
@@ -180,7 +269,7 @@ describe('Ibkr place order tests', function () {
             const symbol = "PLTR"
             const expireDate = new Date(2021, 4, 21)
             stageOptionLookup(symbol, "C", expireDate, "INVALIDEXCHANGE")
-            const buyCall = new OptionOrder(symbol, 22.5, expireDate, "buy", "call", "MKT")
+            const buyCall = new OptionOrder(symbol, 22.5, expireDate, "BUY", "call", "MKT")
             return expect(ibkr.placeOptionOrders(buyCall)).rejects.toThrow("Requested symbol not found in NYSE or NASDAQ")
         });
 
@@ -188,7 +277,7 @@ describe('Ibkr place order tests', function () {
             const symbol = "ELY"
             const expireDate = new Date(2020, 2, 20)
             stageOptionLookup(symbol, "P", expireDate)
-            const buyPut = new OptionOrder(symbol, 30, expireDate.addWeeks(1), "buy", "put", "LMT", 4.05)
+            const buyPut = new OptionOrder(symbol, 30, expireDate.addWeeks(1), "BUY", "put", "LMT", new Decimal(4.05))
             return expect(ibkr.placeOptionOrders(buyPut)).rejects.toThrow("Option expiration not found")
         });
     });

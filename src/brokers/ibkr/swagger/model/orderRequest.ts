@@ -42,7 +42,7 @@ export class OrderRequest {
     */
     'listingExchange'?: string;
     /**
-    * set to true if the order can be executed outside regular trading equitiesMarketHours.
+    * set to true if the order can be executed outside regular trading marketHrs.
     */
     'outsideRTH'?: boolean;
     /**
@@ -58,7 +58,7 @@ export class OrderRequest {
     */
     'ticker'?: string;
     /**
-    * GTC (Good Till Cancel) or DAY. DAY orders are automatically cancelled at the end of the Day or Trading equitiesMarketHours.
+    * GTC (Good Till Cancel) or DAY. DAY orders are automatically cancelled at the end of the Day or Trading marketHrs.
     */
     'tif'?: string;
     /**

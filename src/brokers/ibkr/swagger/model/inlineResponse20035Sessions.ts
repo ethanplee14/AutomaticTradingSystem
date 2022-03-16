@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* If the LIQUID equitiesMarketHours differs from the total trading day then a separate \'session\' tag is returned.
+* If the LIQUID marketHrs differs from the total trading day then a separate \'session\' tag is returned.
 */
 export class InlineResponse20035Sessions {
     'openingTime'?: number;

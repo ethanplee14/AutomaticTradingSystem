@@ -51,17 +51,17 @@ export class IronCondor implements Strategy {
         if (!shouldPlaceTrade)
             return []
 
-        const pb = new OptionOrder(symbol, icStrikes['pb'], expire, "buy", "put", "MKT")
-        const ps = new OptionOrder(symbol, icStrikes['ps'], expire, "sell", "put", "MKT")
-        const cs = new OptionOrder(symbol, icStrikes['cs'], expire, "sell", "call", "MKT")
-        const cb = new OptionOrder(symbol, icStrikes['cb'], expire, "buy", "call", "MKT")
+        const pb = new OptionOrder(symbol, icStrikes['pb'], expire, "BUY", "put", "MKT")
+        const ps = new OptionOrder(symbol, icStrikes['ps'], expire, "SELL", "put", "MKT")
+        const cs = new OptionOrder(symbol, icStrikes['cs'], expire, "SELL", "call", "MKT")
+        const cb = new OptionOrder(symbol, icStrikes['cb'], expire, "BUY", "call", "MKT")
         return [pb, ps, cs, cb]
     }
 }
 
 async function withinStrategyTradingHrs(marketData: MarketData) {
     const today = new Date()
-    const marketHours = await marketData.equitiesMarketHours("OPTION", dateFormat(today, 'yyyy-mm-dd'))
+    const marketHours = await marketData.marketHrs("OPTION", today)
     const tradeHrsStart = (marketHours.start || new Date(0)).clone().addHours(1)
     const tradeHrsClose = (marketHours.end || new Date(0))
     return today >= tradeHrsStart && today < tradeHrsClose

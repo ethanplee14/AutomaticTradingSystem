@@ -14,7 +14,7 @@ import { RequestFile } from './models';
 
 export class InlineResponse20031TifTypes {
     /**
-    * Time in Force values, formatted with o for supporting Outside regular trading equitiesMarketHours and a for Algo trading
+    * Time in Force values, formatted with o for supporting Outside regular trading marketHrs and a for Algo trading
     */
     '_0'?: string;
 

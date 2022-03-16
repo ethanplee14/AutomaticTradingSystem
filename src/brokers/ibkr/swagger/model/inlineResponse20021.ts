@@ -13,25 +13,49 @@
 import { RequestFile } from './models';
 
 export class InlineResponse20021 {
-    'id'?: string;
-    /**
-    * Please note here, if the message is a question, you have to reply to question in order to submit the order successfully. See more in the \"/iserver/reply/{replyid}\" endpoint. 
-    */
-    'message'?: Array<string>;
-
-    static discriminator: string | undefined = undefined;
+    //this was edited from me. Should be editing the swagger.json file directly but will fiddle
+    //with swagger later
+    'order_id'?: string;
+    'order_status'?: string;
+    "encrypt_message": string
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "id",
-            "baseName": "id",
-            "type": "string"
+            name: "order_id",
+            baseName: "order_id",
+            type: "string"
         },
         {
-            "name": "message",
-            "baseName": "message",
-            "type": "Array<string>"
-        }    ];
+            name: "order_status",
+            baseName: "order_status",
+            type: "string"
+        },
+        {
+            name: "encrypt_message",
+            baseName: "encrypt_message",
+            type: "string"
+        }
+    ]
+
+    // 'id'?: string;
+    /**
+    * Please note here, if the message is a question, you have to reply to question in order to submit the order successfully. See more in the \"/iserver/reply/{replyid}\" endpoint. 
+    */
+    // 'message'?: Array<string>;
+    //
+    // static discriminator: string | undefined = undefined;
+    //
+    // static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
+    //     {
+    //         "name": "id",
+    //         "baseName": "id",
+    //         "type": "string"
+    //     },
+    //     {
+    //         "name": "message",
+    //         "baseName": "message",
+    //         "type": "Array<string>"
+    //     }    ];
 
     static getAttributeTypeMap() {
         return InlineResponse20021.attributeTypeMap;

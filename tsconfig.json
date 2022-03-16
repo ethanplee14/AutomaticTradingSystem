@@ -5,12 +5,12 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "target": "ES6",
+    "target": "ES2020",
     "allowJs": true,
     "declaration": true,
     "strict": true,
     "strictNullChecks": true
   },
   "include": ["**/*"],
-  "exclude": ["./dist" ,"./node_modules"]
+  "exclude": ["./dist" ,"./node_modules", "./tests"]
 }

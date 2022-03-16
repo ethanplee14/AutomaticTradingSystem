@@ -9,7 +9,7 @@ export interface TDAMarketHours {
     category?: string,
     product: string,
     productName?: string
-    dayOpen: boolean,
+    isOpen: boolean,
     sessionHours?: {
         regularMarket: [
             {

@@ -1,8 +1,8 @@
 import {calcStrikes} from "../../../src/strategies/iron-condor/calc-strikes";
 
-describe("tests to calculate 10% strikes spread for iron condor", function () {
+describe("tests to calculate strikes spread for iron condor", function () {
 
-    it('should calculate spread strikes from 116 (AFG Sample)', function () {
+    it('should calculate 10% spread strikes from 116 (AFG Sample)', function () {
         const price = 116
         const strikes = [103, 105, 108, 110, 113, 115, 118, 120, 123, 125, 130, 135]
         expect(calcStrikes(price, .1, strikes)).toMatchObject({
@@ -20,7 +20,7 @@ describe("tests to calculate 10% strikes spread for iron condor", function () {
         })
     });
 
-    it('should calculate spread of strikes from 2047.33 (GOOG Sample) ', function () {
+    it('should calculate 10% spread of strikes from 2047.33 (GOOG Sample) ', function () {
         const price = 2047.33
         const strikes = [
             "1830", "1840", "1850", "1860", "1870", "1880", "1890", "1900", "1905", "1910", "1915", "1920",

@@ -2,11 +2,12 @@
   "name": "chad-options",
   "version": "1.0.0",
   "description": "",
-  "main": "./dist/index.js",
+  "main": "./src/app.ts",
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "start": "tsc && node dist/app.js"
+    "start": "node dist/src/app.js",
+    "dev:start": "tsc && node dist/src/app.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,8 @@
     "dateformat": "^4.5.1",
     "datejs": "^1.0.0-rc3",
     "debug": "^4.3.1",
+    "decimal.js": "^10.3.1",
+    "log-timestamp": "^0.3.0",
     "node-fetch": "^2.6.1",
     "request": "^2.88.2",
     "robinhood": "^1.7.0",
@@ -24,6 +27,7 @@
     "@types/dateformat": "^3.0.1",
     "@types/datejs": "^0.0.31",
     "@types/debug": "^4.1.5",
+    "@types/decimal.js": "^7.4.0",
     "@types/jest": "^26.0.20",
     "@types/node": "^14.14.24",
     "@types/node-fetch": "^2.5.8",

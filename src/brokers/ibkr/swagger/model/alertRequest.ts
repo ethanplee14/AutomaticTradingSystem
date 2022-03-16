@@ -43,11 +43,11 @@ export class AlertRequest {
     */
     'tif'?: string;
     /**
-    * format, YYYYMMDD-HH:mm:ss, please NOTE this will only work when tif is GTD 
+    * format, YYYYMMDD-HH:mm:ss, please NOTE this will only work when timeInForce is GTD
     */
     'expireTime'?: string;
     /**
-    * value can only be 0 or 1, set to 1 if the alert can be triggered outside regular trading equitiesMarketHours.
+    * value can only be 0 or 1, set to 1 if the alert can be triggered outside regular trading marketHrs.
     */
     'outsideRth'?: number;
     /**

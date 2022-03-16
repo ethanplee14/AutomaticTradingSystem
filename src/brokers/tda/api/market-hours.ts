@@ -1,5 +1,4 @@
 import {TDAFetcher} from "../net/tda-fetcher";
-import {TDAMarketHours} from "../types/tda-market-hours";
 
 export type Market = "EQUITY" | "OPTION" | "FUTURE" | "BOND" | "FOREX"
 

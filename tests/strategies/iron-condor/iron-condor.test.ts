@@ -78,7 +78,7 @@ describe("Tests for placing trades", function () {
     });
 
     it('should place iron condor trade on Thursday if Friday is closed', async function() {
-        marketData.equitiesMarketHours.mockImplementation((market, dateStr) => {
+        marketData.marketHrs.mockImplementation((market, dateStr) => {
             const date = new Date(dateStr)
             if(date.getDay() == 4) {
                 return {dayOpen: false}
@@ -143,7 +143,7 @@ describe("Tests for placing trades", function () {
         mockMarketHours(2021, 4, 21)
         jest.setSystemTime(new Date(2021, 4, 21, 12))
         const expire = new Date(2021, 4, 28)
-        marketData.equitiesMarketHours.mockResolvedValue({ dayOpen: true })
+        marketData.marketHrs.mockResolvedValue({ dayOpen: true })
         stageICData({"PLTR": 20.56}, expire)
 
         ironCondor.addConstraint(_ => Promise.resolve(true))
@@ -216,9 +216,9 @@ describe("Tests for placing trades", function () {
 
     function mockMarketHours(year?: number, month?: number, day?: number) {
         if(year == undefined || month == undefined || day == undefined) {
-            marketData.equitiesMarketHours.mockResolvedValue({ dayOpen: false })
+            marketData.marketHrs.mockResolvedValue({ dayOpen: false })
         }else {
-            marketData.equitiesMarketHours.mockResolvedValue({
+            marketData.marketHrs.mockResolvedValue({
                 dayOpen: true,
                 start: new Date(year, month, day, 6, 30),
                 end: new Date(year, month, day, 13)

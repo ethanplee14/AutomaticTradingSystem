@@ -1,15 +1,16 @@
 import dateFormat from 'dateformat'
 
-import {Broker} from "../Broker";
+import {Broker, Position} from "../Broker";
 import {ibkrClient, OrderRequest, SecdefInfo} from "./swagger";
 import {OptionOrder} from "../option-order";
 import {shortMonthName, twoDigitYear} from "../../utils/date";
 import {IbkrEngine} from "./ibkr-engine";
+import {Order} from "../order";
 
 export class Ibkr implements Broker {
 
     private useAdaptiveAlgo = true
-    private client
+    readonly client
     private readonly accountId
     private readonly engine
 
@@ -23,6 +24,36 @@ export class Ibkr implements Broker {
     set setAdaptiveAlgo(useAdaptiveAlgo: boolean) {
         this.useAdaptiveAlgo = useAdaptiveAlgo
     }
+
+    async placeEquitiesOrders(...orders: Order[]) {
+        const order = orders[0]
+        if (!order || order.quantity == 0)
+            return []
+
+        const symbolLookup = await this.lookupSymbol(order.symbol)
+        const conid = symbolLookup.conid ?? 0
+
+        const ordersData = [{
+            conid, "side": order.side,
+            "orderType": order.type,
+            "quantity": order.quantity,
+            "tif": order.timeInForce
+        }]
+
+        /*
+        looks like the api is wrong and the response isn't InlineResponse20021
+        manually editted InlineResponse20021. Should edit the swagger.json but will
+        fiddle with swagger's configurations at a later time
+
+        should really throw errors with parameters to know what to debug for rather than return empty object
+         */
+        const response = await this.client.order.iserverAccountAccountIdOrdersPost(this.accountId, {orders: ordersData})
+        return response.body.map(orderRes => ({
+            orderId: orderRes.order_id ?? "",
+            status: orderRes.order_status ?? ""
+        })) ?? []
+    }
+
 
     async placeOptionOrders(...orders: OptionOrder[]) {
         if (orders.length == 0)
@@ -38,20 +69,56 @@ export class Ibkr implements Broker {
 
     async cashBal() {
         const accountSummary = await this.client.account.portfolioAccountIdSummaryGet(this.accountId)
-        return accountSummary.body?.availablefunds?.amount || 0
+        const cashBal = accountSummary.body?.availablefunds?.amount
+        if (cashBal == undefined)
+            throw new Error(`Got unexpected IBKR <cashBal> response:\n\t${accountSummary}`)
+        return cashBal
     }
 
     async buyingPower() {
         const accountSummary = await this.client.account.portfolioAccountIdSummaryGet(this.accountId)
-        return accountSummary.body?.buyingpower?.amount || 0
+        const buyingPower = accountSummary.body?.buyingpower?.amount
+        if (buyingPower == undefined)
+            throw new Error(`Got unexpected IBKR <buyingPower> response:\n\t${accountSummary}`)
+        return buyingPower
     }
 
-    private async lookupSymbol(symbol: string) {
+    async positions() {
+        const positions: Position[] = []
+
+        let pageIndex = 0
+        let positionsRes = await this.client.portfolio.portfolioAccountIdPositionsPageIdGet(this.accountId, pageIndex.toString())
+        while(positionsRes.body.length > 0) {
+            positionsRes.body.forEach((pos: any) => {
+                const position: Position = {
+                    avgCost: pos.avgCost, avgPrice: pos.avgPrice,
+                    marketPrice: pos.mktPrice, marketValue: pos.mktValue,
+                    quantity: pos.position, ticker: pos.ticker
+                }
+                positions.push(position)
+            })
+            positionsRes = await this.client.portfolio.portfolioAccountIdPositionsPageIdGet(this.accountId, (++pageIndex).toString())
+            console.log(positionsRes)
+        }
+        return positions
+    }
+
+    async portfolio() {
+        const portfolio = await this.client.portfolio.portfolioAccountIdAllocationGet(this.accountId) as any
+        return {
+            cash: portfolio.body[0].long?.CASH ?? 0,
+            stocks: portfolio.body[0].long?.STK ?? 0
+        }
+    }
+
+    async lookupSymbol(symbol: string) {
+        console.log("Looking up symbol: " + symbol)
         const stockRequest = await this.client.contract.iserverSecdefSearchPost({symbol})
         const symbolInfo = stockRequest.body[0]
         const exchange = symbolInfo['description']
         if(exchange != "NYSE" && exchange != "NASDAQ")
-            throw new Error(`Requested symbol not found in NYSE or NASDAQ: ${exchange}`)
+            throw new Error(`Requested symbol <${symbol}> not found in NYSE or NASDAQ: ${exchange}`)
+        console.log("Completed lookup: " + symbol)
         return symbolInfo
     }
 
@@ -61,9 +128,11 @@ export class Ibkr implements Broker {
         const optionInfo = await this.client.contract.iserverSecdefInfoGet(
             contractConid, "OPT", expireMonthStr, "SMART", order.strike.toString(), orderRight
         )
+        //api should be editted to reflect this rather than me casting it manually
         return optionInfo.body as SecdefInfo[]
     }
 
+    //This needs to be IBKROptionsOrders. Refactor out
     private buildIBKROrders(orders: OptionOrder[], optionInfoResults: SecdefInfo[][]) {
         const ibkrOrders = orders.map((order, index) => {
             const optInfos = optionInfoResults[index]
@@ -75,7 +144,7 @@ export class Ibkr implements Broker {
                 conid: optInfo.conid,
                 secType: `${optInfo.conid}:OPT`,
                 price: order.price,
-                orderType: order.type, ticker: order.symbol, tif: order.tif.toUpperCase(),
+                orderType: order.type, ticker: order.symbol, tif: order.timeInForce.toUpperCase(),
                 side: order.side.toUpperCase(), quantity: order.quantity,
                 useAdaptive: this.useAdaptiveAlgo
             } as OrderRequest
