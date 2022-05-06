@@ -22,14 +22,15 @@ require('datejs');
     const tdaMarketData = new TDAMarketData(tdaClient(tokenFile))
 
     const ibkr = new Ibkr(accountId)
-    // const ibkrData = new IbkrMarketData(ibkr)
+    const ibkrData = new IbkrMarketData(ibkr)
 
     console.log(await ibkr.portfolio())
     const spactastic = new Spactastic(scrapeSpacUniverse)
     await spactastic.run(ibkr, tdaMarketData)
-    // const hourlyEngine = new StrategyEngine(ibkr, ibkrData)
-    // hourlyEngine.loopInterval = 1000 * 60 * 60
-    // hourlyEngine.register(new Spactastic(scrapeSpacUniverse))
-    // await hourlyEngine.start()
+
+    const hourlyEngine = new StrategyEngine(ibkr, ibkrData)
+    hourlyEngine.loopInterval = 1000 * 60 * 60
+    hourlyEngine.register(new Spactastic(scrapeSpacUniverse))
+    await hourlyEngine.start()
 })()
 

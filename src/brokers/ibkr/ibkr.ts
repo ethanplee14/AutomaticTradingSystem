@@ -42,7 +42,7 @@ export class Ibkr implements Broker {
 
         /*
         looks like the api is wrong and the response isn't InlineResponse20021
-        manually editted InlineResponse20021. Should edit the swagger.json but will
+        manually edited InlineResponse20021. Should edit the swagger.json but will
         fiddle with swagger's configurations at a later time
 
         should really throw errors with parameters to know what to debug for rather than return empty object
@@ -88,6 +88,7 @@ export class Ibkr implements Broker {
 
         let pageIndex = 0
         let positionsRes = await this.client.portfolio.portfolioAccountIdPositionsPageIdGet(this.accountId, pageIndex.toString())
+        console.log("Positions: " + JSON.stringify(positionsRes.body))
         while(positionsRes.body.length > 0) {
             positionsRes.body.forEach((pos: any) => {
                 const position: Position = {
@@ -98,7 +99,6 @@ export class Ibkr implements Broker {
                 positions.push(position)
             })
             positionsRes = await this.client.portfolio.portfolioAccountIdPositionsPageIdGet(this.accountId, (++pageIndex).toString())
-            console.log(positionsRes)
         }
         return positions
     }
@@ -112,8 +112,8 @@ export class Ibkr implements Broker {
     }
 
     async lookupSymbol(symbol: string) {
-        console.log("Looking up symbol: " + symbol)
         const stockRequest = await this.client.contract.iserverSecdefSearchPost({symbol})
+        console.log(stockRequest.body)
         const symbolInfo = stockRequest.body[0]
         const exchange = symbolInfo['description']
         if(exchange != "NYSE" && exchange != "NASDAQ")

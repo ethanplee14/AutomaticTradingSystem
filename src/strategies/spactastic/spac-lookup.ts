@@ -17,3 +17,7 @@ export async function scrapeSpacUniverse() {
         .map((spac: any) => spac.commonSymbol)
 }
 
+function btoa(binaryString: string) {
+    return Buffer.from(binaryString, "binary").toString("base64")
+}
+

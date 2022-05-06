@@ -42,7 +42,7 @@ export class Spactastic implements Strategy {
             const portfolioVal: number = Object.values(portfolio).reduce((acc, curr) => acc + curr, 0)
             const positionToSell = this.sellPositions(positions, broker)
             const rankings = this.calcRankings(positionToSell, Object.values(quotes))
-            console.log("Rankings: " + rankings)
+            console.log("Rankings: " + JSON.stringify(rankings))
             const allocs = this.reallocShares(rankings, portfolioVal)
 
             console.log("Re-balancing Portfolio: " + JSON.stringify(allocs))
@@ -63,10 +63,6 @@ export class Spactastic implements Strategy {
     }
 
     private calcRankings(positions: Position[], quotes: StockQuote[]): Ranking[] {
-        const buyAndSellPositions = positions
-            .map(p => ({symbol: p.ticker, mktPrice: p.marketPrice, quantity: p.quantity}))
-            .concat(quotes.map(q => ({symbol: q.symbol, mktPrice: q.price, quantity: 0})))
-        console.log(buyAndSellPositions)
         return positions
             .map(p => ({symbol: p.ticker, mktPrice: p.marketPrice, quantity: p.quantity}))
             .concat(quotes.map(q => ({symbol: q.symbol, mktPrice: q.price, quantity: 0})))
@@ -86,14 +82,23 @@ export class Spactastic implements Strategy {
     }
 
     private async balancePortfolio(broker: Broker, allocs: {symbol: string, quantity: number}[]) {
-        await Promise.all(allocs
-            .filter(a => a.quantity < 0)
-            .map(placeOrder))
-        await Promise.all(allocs
-            .filter(a => a.quantity > 1)
-            .map(placeOrder))
+        for (let a of allocs.filter(a => a.quantity < 0)) {
+            await placeOrder(a)
+        }
+        for (let a of allocs.filter(a => a.quantity > 1)) {
+            console.log("Allocation: " + JSON.stringify(a))
+            const order = await placeOrder(a)
+            console.log(order)
+        }
+        // await Promise.all(allocs
+        //     .filter(a => a.quantity < 0)
+        //     .map(placeOrder))
+        // const orders = await Promise.all(allocs
+        //     .filter(a => a.quantity > 1)
+        //     .map(placeOrder))
 
         function placeOrder(alloc: {symbol: string, quantity: number}) {
+            console.log("Submitting order for " + alloc.quantity + " $" + alloc.symbol)
             return broker.placeEquitiesOrders({
                 symbol: alloc.symbol, timeInForce: "DAY",
                 quantity: Math.abs(alloc.quantity),
